@@ -1,0 +1,16 @@
+.env
+backup.*
+.DS_Store
+node_modules
+dist
+.vscode
+!.vscode/launch.json
+.idea
+*.log
+.idea
+*.tsbuildinfo
+
+server/node_modules
+server/env/.env
+server/.DS_Store
+server/.vscode
