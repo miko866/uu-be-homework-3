@@ -2,7 +2,7 @@
 
 const Role = require('../models/role-model');
 
-const { NotFoundError } = require('../utils/errors');
+const { NotFoundError, NoContentError } = require('../utils/errors');
 
 /**
  * Get one role depends on name or id
@@ -11,7 +11,7 @@ const { NotFoundError } = require('../utils/errors');
  * @returns {Object } role
  */
 const getRole = async (id = undefined, name = undefined) => {
-  let role = null
+  let role = null;
   if (name) role = await Role.findOne({ name }).lean();
   else role = await Role.findById(id).lean();
 
@@ -24,7 +24,10 @@ const getRole = async (id = undefined, name = undefined) => {
  * @returns {Array[Object]} Roles
  */
 const getRoles = async () => {
-  return await Role.find().lean();
+  const roles = await Role.find().lean();
+
+  if (roles.length === 0) throw new NoContentError('No roles');
+  return roles;
 };
 
 module.exports = { getRole, getRoles };

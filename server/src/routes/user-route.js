@@ -4,6 +4,16 @@ const express = require('express');
 const router = express.Router();
 const { body, param, matchedData } = require('express-validator');
 
+const {
+  registerUser,
+  createUser,
+  updateUser,
+  deleteUser,
+  currentUser,
+  allUsers,
+  getUser,
+} = require('../controllers/user-controller');
+
 const { validateRequest } = require('../middleware/validate-request');
 const { checkJwt } = require('../middleware/authentication');
 
@@ -16,8 +26,10 @@ router.post(
   validateRequest,
   async (req, res, next) => {
     try {
-      const queryData = matchedData(req, { locations: ['body'] });
-      res.status(201).send(queryData);
+      const response = await registerUser(matchedData(req, { locations: ['body'] }));
+
+      if (response) res.status(201).send({ message: 'User successfully registered' });
+      else res.status(400).send({ message: 'User cannot be registered' });
     } catch (error) {
       next(error);
     }
@@ -35,25 +47,21 @@ router.post(
   validateRequest,
   async (req, res, next) => {
     try {
-      const queryData = matchedData(req, { locations: ['body'] });
-      res.status(201).send(queryData);
+      const response = await createUser(matchedData(req, { locations: ['body'] }));
+
+      if (response) res.status(201).send({ message: 'User successfully created' });
+      else res.status(400).send({ message: 'User cannot be created' });
     } catch (error) {
       next(error);
     }
   },
 );
 
-router.get('/user/current-user', checkJwt(), async (req, res, next) => {
+router.get('/users', checkJwt(), async (req, res, next) => {
   try {
-    res.status(200).send();
-  } catch (error) {
-    next(error);
-  }
-});
+    const users = await allUsers();
 
-router.get('/users', checkJwt(), validateRequest, async (req, res, next) => {
-  try {
-    res.status(200).send();
+    res.status(200).send(users);
   } catch (error) {
     next(error);
   }
@@ -66,7 +74,11 @@ router.get(
   validateRequest,
   async (req, res, next) => {
     try {
-      res.status(200).send();
+      const { userId } = req.params;
+
+      const user = await getUser(userId);
+
+      res.status(200).send(user);
     } catch (error) {
       next(error);
     }
@@ -85,8 +97,14 @@ router.patch(
   validateRequest,
   async (req, res, next) => {
     try {
-      const queryData = matchedData(req, { locations: ['body', 'param'] });
-      res.status(201).send(queryData);
+      const { userId } = req.params;
+      const bodyData = matchedData(req, { locations: ['body', 'param'] });
+      const isAdmin = req.isAdmin;
+
+      const response = await updateUser(userId, bodyData, isAdmin);
+
+      if (response) res.status(201).send({ message: 'User successfully updated' });
+      else res.status(400).send({ message: 'User cannot be updated' });
     } catch (error) {
       next(error);
     }
@@ -95,12 +113,17 @@ router.patch(
 
 router.delete(
   '/user/:userId',
-  checkJwt(),
+  checkJwt('isSamePersonOrAdmin'),
   param('userId').not().isEmpty().isString().trim().escape(),
   validateRequest,
   async (req, res, next) => {
     try {
-      res.status(204).send();
+      const { userId } = req.params;
+
+      const response = await deleteUser(userId);
+
+      if (response) res.status(204).send({ message: `User successfully deleted` });
+      else res.status(400).send({ message: `User cannot be deleted` });
     } catch (error) {
       next(error);
     }

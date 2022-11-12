@@ -91,11 +91,23 @@ class ForbiddenError extends GeneralError {
   constructor(message) {
     super(message ?? 'Forbidden', 403);
 
-    Object.setPrototypeOf(this, NotAuthorizedError.prototype);
+    Object.setPrototypeOf(this, ForbiddenError.prototype);
   }
 
   serializeErrors() {
     return { message: this.message ?? 'Forbidden' };
+  }
+}
+
+class NoContentError extends GeneralError {
+  constructor(message) {
+    super(message ?? 'No Content', 204);
+
+    Object.setPrototypeOf(this, NoContentError.prototype);
+  }
+
+  serializeErrors() {
+    return { message: this.message ?? 'No Content' };
   }
 }
 
@@ -108,4 +120,5 @@ module.exports = {
   ConflictError,
   NotAuthorizedError,
   ForbiddenError,
+  NoContentError,
 };
