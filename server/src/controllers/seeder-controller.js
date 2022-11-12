@@ -5,6 +5,7 @@ const MongoClient = require('mongodb').MongoClient;
 
 const { DUMMY_ROLE } = require('../data/dummyRole');
 const { DUMMY_USER } = require('../data/dummyUser');
+const { DUMMY_SHOPPING_LIST } = require('../data/dummyShoppingList');
 
 const logger = require('../utils/logger');
 
@@ -25,6 +26,7 @@ const createDummyData = async () => {
     // Create Collections
     const roleCollection = client.db('uu_homeworks').collection('role');
     const userCollection = client.db('uu_homeworks').collection('user');
+    const shoppingListCollection = client.db('uu_homeworks').collection('shoppingList');
 
     const collections = await client.db('uu_homeworks').collections();
 
@@ -45,6 +47,24 @@ const createDummyData = async () => {
     // Seed DB
     roleCollection.insertMany(DUMMY_ROLE);
     userCollection.insertMany(DUMMY_USER);
+    shoppingListCollection.insertMany(DUMMY_SHOPPING_LIST);
+
+    userCollection.findOneAndUpdate(
+      { firstName: 'Admin' },
+      {
+        $set: {
+          shoppingLists: [DUMMY_SHOPPING_LIST[0], DUMMY_SHOPPING_LIST[1]],
+        },
+      },
+    );
+    userCollection.findOneAndUpdate(
+      { firstName: 'Simple' },
+      {
+        $set: {
+          shoppingLists: [DUMMY_SHOPPING_LIST[2]],
+        },
+      },
+    );
 
     logger.info('Database has been seeded successfully.');
   } catch (err) {

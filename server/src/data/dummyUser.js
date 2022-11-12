@@ -15,7 +15,7 @@ const DUMMY_USER = [
     roleId: DUMMY_ROLE[0],
     salt: 'ba1c23c5-875f-4d80-ac92-fcb90e6b7150',
   }),
-  // adminPassword
+  // userPassword
   new User({
     firstName: 'Simple',
     lastName: 'User',
