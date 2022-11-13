@@ -1,31 +1,31 @@
 'use strict';
 
 const ShoppingList = require('../models/shoppingList-model');
-const User = require('../models/user-model');
+const ShoppingListItem = require('../models/shoppingListItem-model');
 
 const { ConflictError, NotFoundError, NoContentError } = require('../utils/errors');
-const logger = require('../utils/logger');
 
-const createShoppingListItems = async (data, userId) => {
-  const shoppingListExists = await ShoppingList.exists({ name: data.name });
-  if (shoppingListExists) throw new ConflictError('Shopping List exists');
+const createShoppingListItems = async (data, shoppingListId) => {
+  const shoppingListExists = await ShoppingList.exists({ _id: shoppingListId });
+  if (!shoppingListExists) throw new ConflictError('Shopping List does not exists');
 
-  const checkUser = await User.findOne({ _id: userId }).lean();
-  if (!checkUser) throw new NotFoundError("User doesn't exists");
+  const payload = data.items.map((object) => {
+    return { ...object, shoppingListId };
+  });
 
-  data.userId = userId;
-  const shoppingList = new ShoppingList(data);
+  const response = await ShoppingListItem.insertMany(payload);
 
-  return await shoppingList
-    .save()
-    .then(async () => {
-      return true;
-    })
-    .catch((error) => {
-      logger.error(error);
-      return false;
-    });
-};
+  if (!response) return false;
+
+  await ShoppingList.findOneAndUpdate(
+    { _id: shoppingListId },
+    {
+      $push: { shoppingListItems: response },
+    },
+  );
+
+  return true;
+};;
 
 /**
  * Get list of all shopping lists for all users
