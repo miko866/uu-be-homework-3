@@ -50,8 +50,8 @@ const allShoppingLists = async (userId) => {
     const checkUser = await User.findOne({ _id: userId }).lean();
     if (!checkUser) throw new NotFoundError("User doesn't exists");
 
-    shoppingLists = await ShoppingList.find({ userId }).lean();
-  } else shoppingLists = await ShoppingList.find().lean();
+    shoppingLists = await ShoppingList.find({ userId }).populate({ path: 'shoppingListItems' }).lean();
+  } else shoppingLists = await ShoppingList.find().populate({ path: 'shoppingListItems' }).lean();
 
   if (shoppingLists.length === 0) throw new NoContentError('No shopping lists');
   return shoppingLists;
@@ -64,7 +64,9 @@ const allShoppingLists = async (userId) => {
  * @returns Object
  */
 const getShoppingList = async (shoppingListId, userId) => {
-  const shoppingList = await ShoppingList.findOne({ _id: shoppingListId, userId }).lean();
+  const shoppingList = await ShoppingList.findOne({ _id: shoppingListId, userId })
+    .populate({ path: 'shoppingListItems' })
+    .lean();
 
   if (!shoppingList) throw new NotFoundError("Shopping List doesn't exists");
 
