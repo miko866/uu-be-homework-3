@@ -29,7 +29,7 @@ shoppingListSchema.virtual('user', {
   justOne: true,
 });
 
-shoppingListSchema.virtual('user', {
+shoppingListSchema.virtual('users', {
   ref: 'UserShoppingList',
   localField: '_id',
   foreignField: 'userId',

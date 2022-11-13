@@ -29,6 +29,7 @@ const checkJwt = (value) => {
         token = req.headers.authorization.split(' ')[1];
       } else token = tokenOrigin;
 
+      // Check if JWT Token is valid and decoded it
       let decoded = null;
       try {
         decoded = jwt.verify(token, env.get('JWT_SECRET').required().asString());
@@ -46,7 +47,7 @@ const checkJwt = (value) => {
 
         if (value === AUTH_MODE.isSamePersonOrAdmin) userId = req.params.userId;
         // eslint-disable-next-line no-use-before-define
-        response = await trySwitch(value, token, userId);
+        response = await trySwitch(value, decoded, userId);
 
         if (response === 'admin') {
           req.isAdmin = true;
@@ -69,14 +70,14 @@ const checkJwt = (value) => {
  * @param {String} token
  * @returns Boolean
  */
-const trySwitch = async (value, token, userId) => {
+const trySwitch = async (value, decoded, userId) => {
   switch (value) {
     case AUTH_MODE.isAdmin:
       // eslint-disable-next-line no-use-before-define
-      return await checkIsAdmin(token);
+      return await checkIsAdmin(decoded);
     case AUTH_MODE.isSamePersonOrAdmin:
       // eslint-disable-next-line no-use-before-define
-      return await checkIsSamePersonOrAdmin(token, userId);
+      return await checkIsSamePersonOrAdmin(decoded, userId);
     case AUTH_MODE.isOwner:
       // eslint-disable-next-line no-use-before-define
       return true;
@@ -94,9 +95,8 @@ const trySwitch = async (value, token, userId) => {
  * @param {String} token
  * @returns Boolean
  */
-const checkIsAdmin = async (token) => {
+const checkIsAdmin = async (decoded) => {
   try {
-    const decoded = jwt.verify(token, env.get('JWT_SECRET').required().asString());
     const role = await getRole(decoded.role, undefined);
     if (role.name !== ROLE.admin) throw new NotAuthorizedError();
 
@@ -113,9 +113,8 @@ const checkIsAdmin = async (token) => {
  * @param {String} userId
  * @returns Boolean || String
  */
-const checkIsSamePersonOrAdmin = async (token, userId) => {
+const checkIsSamePersonOrAdmin = async (decoded, userId) => {
   try {
-    const decoded = jwt.verify(token, env.get('JWT_SECRET').required().asString());
     const role = await getRole(decoded.role, undefined);
 
     if (decoded.id === userId && role.name === ROLE.admin) return 'admin';

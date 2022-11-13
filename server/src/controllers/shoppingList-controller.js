@@ -29,31 +29,26 @@ const createShoppingList = async (data, userId) => {
     });
 };
 
-// /**
-//  * Get all users can only admin
-//  * @returns {Array[Object]} users
-//  */
-// const allUsers = async () => {
-//   const users = await User.find().populate({ path: 'role' }).lean();
+const allShoppingLists = async (userId) => {
+  let shoppingLists = null;
+  if (userId) {
+    const checkUser = await User.findOne({ _id: userId }).lean();
+    if (!checkUser) throw new NotFoundError("User doesn't exists");
 
-//   if (users.length === 0) throw new NoContentError('No users');
-//   return users;
-// };
+    shoppingLists = await ShoppingList.find({ userId }).lean();
+  } else shoppingLists = await ShoppingList.find().lean();
 
-// /**
-//  * Get one user depends on id
-//  * @param {String} userId
-//  * @returns {Object } user
-//  */
-// const getUser = async (userId) => {
-//   const user = await User.findOne({ _id: userId })
-//     .lean()
-//     .populate([{ path: 'role' }]);
+  if (shoppingLists.length === 0) throw new NoContentError('No shopping lists');
+  return shoppingLists;
+};
 
-//   if (!user) throw new NotFoundError("User doesn't exists");
+const getShoppingList = async (shoppingListId, userId) => {
+  const shoppingList = await ShoppingList.findOne({ _id: shoppingListId, userId }).lean();
 
-//   return user;
-// };
+  if (!shoppingList) throw new NotFoundError("Shopping List doesn't exists");
+
+  return shoppingList;
+};
 
 // /**
 //  * Update user, only admins or same user can do that
@@ -107,4 +102,4 @@ const createShoppingList = async (data, userId) => {
 //   else return false;
 // };
 
-module.exports = { createShoppingList };
+module.exports = { createShoppingList, allShoppingLists, getShoppingList };

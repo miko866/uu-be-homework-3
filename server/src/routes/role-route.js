@@ -9,24 +9,27 @@ const { getRoles, getRole } = require('../controllers/role-controller');
 const { validateRequest } = require('../middleware/validate-request');
 const { checkJwt } = require('../middleware/authentication');
 
-router.get(
-  '/roles',
-  checkJwt('isAdmin'),
-  validateRequest,
-  async (req, res, next) => {
-    try {
-      const roles = await getRoles();
-      res.status(200).send({ roles });
-    } catch (error) {
-      next(error);
-    }
-  },
-);
+const { isValidMongoId } = require('../utils/helpers');
+
+router.get('/roles', checkJwt('isAdmin'), validateRequest, async (req, res, next) => {
+  try {
+    const roles = await getRoles();
+    res.status(200).send({ roles });
+  } catch (error) {
+    next(error);
+  }
+});
 
 router.get(
   '/role/:roleId',
   checkJwt('isAdmin'),
-  param('roleId').not().isEmpty().isString().trim().escape(),
+  param('roleId')
+    .not()
+    .isEmpty()
+    .isString()
+    .trim()
+    .escape()
+    .custom((value) => isValidMongoId(value)),
   validateRequest,
   async (req, res, next) => {
     try {

@@ -17,6 +17,8 @@ const {
 const { validateRequest } = require('../middleware/validate-request');
 const { checkJwt } = require('../middleware/authentication');
 
+const { isValidMongoId } = require('../utils/helpers');
+
 router.post(
   '/user/register',
   body('email').not().isEmpty().trim().escape().isEmail(),
@@ -70,7 +72,13 @@ router.get('/users', checkJwt(), async (req, res, next) => {
 router.get(
   '/user/:userId',
   checkJwt(),
-  param('userId').not().isEmpty().isString().trim().escape(),
+  param('userId')
+    .not()
+    .isEmpty()
+    .isString()
+    .trim()
+    .escape()
+    .custom((value) => isValidMongoId(value)),
   validateRequest,
   async (req, res, next) => {
     try {
@@ -88,7 +96,13 @@ router.get(
 router.patch(
   '/user/:userId',
   checkJwt('isSamePersonOrAdmin'),
-  param('userId').not().isEmpty().isString().trim().escape(),
+  param('userId')
+    .not()
+    .isEmpty()
+    .isString()
+    .trim()
+    .escape()
+    .custom((value) => isValidMongoId(value)),
   body('firstName').isString().trim().escape().isLength({ min: 2, max: 255 }).optional({ nullable: true }),
   body('lastName').isString().trim().escape().isLength({ min: 2, max: 255 }).optional({ nullable: true }),
   body('email').trim().escape().isEmail().optional({ nullable: true }),
@@ -114,7 +128,13 @@ router.patch(
 router.delete(
   '/user/:userId',
   checkJwt('isSamePersonOrAdmin'),
-  param('userId').not().isEmpty().isString().trim().escape(),
+  param('userId')
+    .not()
+    .isEmpty()
+    .isString()
+    .trim()
+    .escape()
+    .custom((value) => isValidMongoId(value)),
   validateRequest,
   async (req, res, next) => {
     try {

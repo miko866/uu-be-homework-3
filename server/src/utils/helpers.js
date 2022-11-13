@@ -1,5 +1,7 @@
 'use strict';
 
+const mongoose = require('mongoose');
+
 /**
  * Remove all duplicates values from Array of objects
  * @param {Array[Objects]} arr
@@ -21,9 +23,19 @@ const dashToCamelCase = (string) => {
   });
 };
 
-
+/**
+ * Check if MongoId ObjectId is valid
+ * @param {String} value
+ * @returns Boolean
+ */
+const isValidMongoId = (value) => {
+  const isValid = mongoose.isValidObjectId(value);
+  if (!isValid) return false;
+  return true;
+};
 
 module.exports = {
   arrayObjectUnique,
-  dashToCamelCase
+  dashToCamelCase,
+  isValidMongoId,
 };

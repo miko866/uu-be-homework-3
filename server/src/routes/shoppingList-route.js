@@ -4,10 +4,12 @@ const express = require('express');
 const router = express.Router();
 const { body, param, matchedData } = require('express-validator');
 
-const { createShoppingList } = require('../controllers/shoppingList-controller');
+const { createShoppingList, allShoppingLists, getShoppingList } = require('../controllers/shoppingList-controller');
 
 const { validateRequest } = require('../middleware/validate-request');
 const { checkJwt } = require('../middleware/authentication');
+
+const { isValidMongoId } = require('../utils/helpers');
 
 router.post(
   '/shopping-list',
@@ -26,22 +28,33 @@ router.post(
   },
 );
 
-router.get('/shopping-lists', checkJwt('isSamePersonOrAdmin'), async (req, res, next) => {
+router.get('/shopping-lists', checkJwt('isAdmin'), async (req, res, next) => {
   try {
-    res.status(200).send();
+    const shoppingLists = await allShoppingLists();
+
+    res.status(200).send(shoppingLists);
   } catch (error) {
     next(error);
   }
 });
 
 router.get(
-  '/shopping-list/:userId',
-  checkJwt('isAllowed'),
-  param('userId').not().isEmpty().isString().trim().escape(),
+  '/shopping-lists/:userId',
+  checkJwt('isSamePersonOrAdmin'),
+  param('userId')
+    .not()
+    .isEmpty()
+    .isString()
+    .trim()
+    .escape()
+    .custom((value) => isValidMongoId(value)),
   validateRequest,
   async (req, res, next) => {
     try {
-      res.status(200).send();
+      const { userId } = req.params;
+      const shoppingLists = await allShoppingLists(userId);
+
+      res.status(200).send(shoppingLists);
     } catch (error) {
       next(error);
     }
@@ -49,13 +62,30 @@ router.get(
 );
 
 router.get(
-  '/shopping-list/:shoppingListId',
-  checkJwt('isAllowed'),
-  param('shoppingListId').not().isEmpty().isString().trim().escape(),
+  '/shopping-list/:shoppingListId/user/:userId',
+  checkJwt('isSamePersonOrAdmin'),
+  param('shoppingListId')
+    .not()
+    .isEmpty()
+    .isString()
+    .trim()
+    .escape()
+    .custom((value) => isValidMongoId(value)),
+  param('userId')
+    .not()
+    .isEmpty()
+    .isString()
+    .trim()
+    .escape()
+    .custom((value) => isValidMongoId(value)),
   validateRequest,
   async (req, res, next) => {
     try {
-      res.status(200).send();
+      const { shoppingListId, userId } = req.params;
+
+      const shoppingList = await getShoppingList(shoppingListId, userId);
+
+      res.status(200).send(shoppingList);
     } catch (error) {
       next(error);
     }
@@ -64,7 +94,7 @@ router.get(
 
 router.patch(
   '/shopping-list/:shoppingListId',
-  checkJwt('isAllowed'),
+  checkJwt('isSamePersonOrAdmin'),
   param('shoppingListId').not().isEmpty().isString().trim().escape(),
   body('name').isString().trim().escape().isLength({ min: 4, max: 255 }),
   validateRequest,
