@@ -75,11 +75,18 @@ userSchema.virtual('role', {
   justOne: true,
 });
 
-userSchema.virtual('shoppingList', {
-  ref: 'UserShoppingList',
-  localField: '_id',
-  foreignField: 'shoppingListId',
-});
+// userSchema.virtual('shoppingList', {
+//   ref: 'ShoppingList',
+//   localField: 'shoppingListId',
+//   foreignField: '_id',
+//   justOne: false,
+// });
+
+// userSchema.virtual('shoppingList', {
+//   ref: 'UserShoppingList',
+//   localField: '_id',
+//   foreignField: 'shoppingListId',
+// });
 
 userSchema.set('toObject', {
   virtuals: true,

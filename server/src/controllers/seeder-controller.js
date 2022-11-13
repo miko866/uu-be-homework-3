@@ -56,7 +56,7 @@ const createDummyData = async () => {
       { firstName: 'Admin' },
       {
         $set: {
-          shoppingLists: [DUMMY_SHOPPING_LIST[0], DUMMY_SHOPPING_LIST[1]],
+          shoppingLists: [DUMMY_SHOPPING_LIST[0]._id, DUMMY_SHOPPING_LIST[1]._id],
         },
       },
     );
@@ -64,35 +64,35 @@ const createDummyData = async () => {
       { firstName: 'Simple' },
       {
         $set: {
-          shoppingLists: [DUMMY_SHOPPING_LIST[2]],
+          shoppingLists: [DUMMY_SHOPPING_LIST[2]._id],
         },
       },
     );
 
-    shoppingListCollection.findOneAndUpdate(
-      { name: 'test01' },
-      {
-        $set: {
-          shoppingListItems: [DUMMY_SHOPPING_LIST_ITEM[0], DUMMY_SHOPPING_LIST_ITEM[1], DUMMY_SHOPPING_LIST_ITEM[2]],
-        },
-      },
-    );
-    shoppingListCollection.findOneAndUpdate(
-      { name: 'test02' },
-      {
-        $set: {
-          shoppingListItems: [DUMMY_SHOPPING_LIST_ITEM[3], DUMMY_SHOPPING_LIST_ITEM[4]],
-        },
-      },
-    );
-    shoppingListCollection.findOneAndUpdate(
-      { name: 'test03' },
-      {
-        $set: {
-          shoppingListItems: [DUMMY_SHOPPING_LIST_ITEM[5], DUMMY_SHOPPING_LIST_ITEM[6]],
-        },
-      },
-    );
+    // shoppingListCollection.findOneAndUpdate(
+    //   { name: 'test01' },
+    //   {
+    //     $set: {
+    //       shoppingListItems: [DUMMY_SHOPPING_LIST_ITEM[0], DUMMY_SHOPPING_LIST_ITEM[1], DUMMY_SHOPPING_LIST_ITEM[2]],
+    //     },
+    //   },
+    // );
+    // shoppingListCollection.findOneAndUpdate(
+    //   { name: 'test02' },
+    //   {
+    //     $set: {
+    //       shoppingListItems: [DUMMY_SHOPPING_LIST_ITEM[3], DUMMY_SHOPPING_LIST_ITEM[4]],
+    //     },
+    //   },
+    // );
+    // shoppingListCollection.findOneAndUpdate(
+    //   { name: 'test03' },
+    //   {
+    //     $set: {
+    //       shoppingListItems: [DUMMY_SHOPPING_LIST_ITEM[5], DUMMY_SHOPPING_LIST_ITEM[6]],
+    //     },
+    //   },
+    // );
 
     logger.info('Database has been seeded successfully.');
   } catch (err) {

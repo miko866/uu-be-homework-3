@@ -68,7 +68,7 @@ const createUser = async (data) => {
  * @returns {Array[Object]} users
  */
 const allUsers = async () => {
-  const users = await User.find().populate({ path: 'role' }).lean();
+  const users = await User.find().populate({ path: 'role' }).populate({ path: 'shoppingLists' }).lean();
 
   if (users.length === 0) throw new NoContentError('No users');
   return users;
@@ -82,7 +82,8 @@ const allUsers = async () => {
 const getUser = async (userId) => {
   const user = await User.findOne({ _id: userId })
     .lean()
-    .populate([{ path: 'role' }]);
+    .populate([{ path: 'role' }])
+    .populate({ path: 'shoppingLists' });
 
   if (!user) throw new NotFoundError("User doesn't exists");
 

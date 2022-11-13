@@ -22,9 +22,17 @@ const createShoppingList = async (data, userId) => {
   data.userId = userId;
   const shoppingList = new ShoppingList(data);
 
+  console.log('shoppingList -----------', shoppingList);
+
   return await shoppingList
     .save()
     .then(async () => {
+      await User.findOneAndUpdate(
+        { _id: userId },
+        {
+          $push: { shoppingLists: shoppingList },
+        },
+      );
       return true;
     })
     .catch((error) => {
