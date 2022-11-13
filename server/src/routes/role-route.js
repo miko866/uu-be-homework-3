@@ -13,8 +13,8 @@ const { isValidMongoId } = require('../utils/helpers');
 
 router.get('/roles', checkJwt('isAdmin'), validateRequest, async (req, res, next) => {
   try {
-    const roles = await getRoles();
-    res.status(200).send({ roles });
+    const response = await getRoles();
+    res.status(200).send({ response });
   } catch (error) {
     next(error);
   }
@@ -34,9 +34,9 @@ router.get(
   async (req, res, next) => {
     try {
       const { roleId } = req.params;
-      const role = await getRole(roleId, undefined);
+      const response = await getRole(roleId, undefined);
 
-      res.status(200).send({ role });
+      res.status(200).send({ response });
     } catch (error) {
       next(error);
     }

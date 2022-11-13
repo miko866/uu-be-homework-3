@@ -2,12 +2,16 @@
 
 const ShoppingList = require('../models/shoppingList-model');
 const User = require('../models/user-model');
-const { getRole } = require('./role-controller');
 
-const { ConflictError, NotFoundError, ForbiddenError, NoContentError, NotAuthorizedError } = require('../utils/errors');
-const { ROLE } = require('../utils/constants');
+const { ConflictError, NotFoundError, NoContentError } = require('../utils/errors');
 const logger = require('../utils/logger');
 
+/**
+ * Create new shopping list
+ * @param {Object} data
+ * @param {String} userId
+ * @returns Boolean
+ */
 const createShoppingList = async (data, userId) => {
   const shoppingListExists = await ShoppingList.exists({ name: data.name });
   if (shoppingListExists) throw new ConflictError('Shopping List exists');
@@ -29,6 +33,11 @@ const createShoppingList = async (data, userId) => {
     });
 };
 
+/**
+ * Get list of all shopping lists for all users
+ * @param {String} userId
+ * @returns Array[Object]
+ */
 const allShoppingLists = async (userId) => {
   let shoppingLists = null;
   if (userId) {
@@ -42,6 +51,12 @@ const allShoppingLists = async (userId) => {
   return shoppingLists;
 };
 
+/**
+ * Get one shopping list
+ * @param {String} shoppingListId
+ * @param {String} userId
+ * @returns Object
+ */
 const getShoppingList = async (shoppingListId, userId) => {
   const shoppingList = await ShoppingList.findOne({ _id: shoppingListId, userId }).lean();
 
@@ -50,56 +65,40 @@ const getShoppingList = async (shoppingListId, userId) => {
   return shoppingList;
 };
 
-// /**
-//  * Update user, only admins or same user can do that
-//  * @param {String} userId
-//  * @param {Object} data
-//  * @param {Boolean} isAdmin
-//  * @returns Boolean
-//  */
-// const updateUser = async (userId, data, isAdmin) => {
-//   const checkUser = await User.findOne({ _id: userId }).lean();
-//   if (!checkUser) throw new NotFoundError("User doesn't exists");
+/**
+ * Update one shopping list
+ * @param {String} shoppingListId
+ * @param {String} userId
+ * @param {Object} data
+ * @returns Boolean
+ */
+const updateShoppingList = async (shoppingListId, userId, data) => {
+  const checkShoppingList = await ShoppingList.findOne({ _id: shoppingListId }).lean();
+  if (!checkShoppingList) throw new NotFoundError("Shopping list doesn't exists");
 
-//   let newData;
+  const filter = { _id: shoppingListId, userId };
+  const update = data;
+  const opts = { new: true };
 
-//   // Update role if admin
-//   if (isAdmin && data?.roleId) {
-//     const role = await getRole(data.roleId, undefined);
+  const shoppingList = await ShoppingList.findOneAndUpdate(filter, update, opts);
 
-//     delete data.role;
+  if (shoppingList) return true;
+  else return false;
+};
 
-//     newData = {
-//       ...data,
-//       roleId: role._id,
-//     };
-//   } else if (isAdmin === undefined && data?.roleId) throw new NotAuthorizedError();
-//   else {
-//     newData = data;
-//   }
+/**
+ * Delete one shopping list
+ * @param {String} shoppingListId
+ * @param {String} userId
+ * @returns Boolean
+ */
+const deleteShoppingList = async (shoppingListId, userId) => {
+  const shoppingList = await ShoppingList.findOne({ _id: shoppingListId }).lean();
+  if (!shoppingList) throw new NotFoundError("Shopping List doesn't exists");
 
-//   const filter = { _id: userId };
-//   const update = newData;
-//   const opts = { new: true };
+  const response = await ShoppingList.deleteOne({ _id: shoppingListId, userId });
+  if (response) return true;
+  else return false;
+};
 
-//   const user = await User.findOneAndUpdate(filter, update, opts);
-
-//   if (user) return true;
-//   else return false;
-// };
-
-// /**
-//  * Only admins can delete user
-//  * @param {String} userId
-//  * @returns Boolean
-//  */
-// const deleteUser = async (userId) => {
-//   const user = await User.findOne({ _id: userId }).lean();
-//   if (!user) throw new NotFoundError("User doesn't exists");
-
-//   const response = await User.deleteOne({ email: user.email });
-//   if (response) return true;
-//   else return false;
-// };
-
-module.exports = { createShoppingList, allShoppingLists, getShoppingList };
+module.exports = { createShoppingList, allShoppingLists, getShoppingList, updateShoppingList, deleteShoppingList };

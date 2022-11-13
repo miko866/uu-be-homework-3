@@ -9,7 +9,6 @@ const {
   createUser,
   updateUser,
   deleteUser,
-  currentUser,
   allUsers,
   getUser,
 } = require('../controllers/user-controller');
@@ -61,9 +60,9 @@ router.post(
 
 router.get('/users', checkJwt(), async (req, res, next) => {
   try {
-    const users = await allUsers();
+    const response = await allUsers();
 
-    res.status(200).send(users);
+    res.status(200).send(response);
   } catch (error) {
     next(error);
   }
@@ -84,9 +83,9 @@ router.get(
     try {
       const { userId } = req.params;
 
-      const user = await getUser(userId);
+      const response = await getUser(userId);
 
-      res.status(200).send(user);
+      res.status(200).send(response);
     } catch (error) {
       next(error);
     }
@@ -112,7 +111,7 @@ router.patch(
   async (req, res, next) => {
     try {
       const { userId } = req.params;
-      const bodyData = matchedData(req, { locations: ['body', 'param'] });
+      const bodyData = matchedData(req, { locations: ['body'] });
       const isAdmin = req.isAdmin;
 
       const response = await updateUser(userId, bodyData, isAdmin);
@@ -142,7 +141,7 @@ router.delete(
 
       const response = await deleteUser(userId);
 
-      if (response) res.status(204).send({ message: `User successfully deleted` });
+      if (response) res.status(204).send();
       else res.status(400).send({ message: `User cannot be deleted` });
     } catch (error) {
       next(error);
