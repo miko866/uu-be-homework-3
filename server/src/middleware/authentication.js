@@ -29,13 +29,18 @@ const checkJwt = (value) => {
         token = req.headers.authorization.split(' ')[1];
       } else token = tokenOrigin;
 
-      // Verify JWT-Token
-      jwt.verify(token, env.get('JWT_SECRET').required().asString(), (err) => {
-        if (err) throw new NotAuthorizedError();
-      });
+      let decoded = null;
+      try {
+        decoded = jwt.verify(token, env.get('JWT_SECRET').required().asString());
+      } catch (err) {
+        throw new NotAuthorizedError();
+      }
 
-      // Check JWT custom value
-      if (value) {
+      if (value === AUTH_MODE.getCurrentUser) {
+        req.userId = decoded.id;
+        next();
+      } else if (value) {
+        // Check JWT custom value
         let response = null;
         let userId = null;
 
@@ -74,10 +79,10 @@ const trySwitch = async (value, token, userId) => {
       return await checkIsSamePersonOrAdmin(token, userId);
     case AUTH_MODE.isOwner:
       // eslint-disable-next-line no-use-before-define
-      return true
+      return true;
     case AUTH_MODE.isAllowed:
       // eslint-disable-next-line no-use-before-define
-      return true
+      return true;
     default:
       logger.error(`Sorry, you are out of ${value}.`);
       throw new NotAuthorizedError();
