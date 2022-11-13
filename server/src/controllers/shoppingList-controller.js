@@ -22,8 +22,6 @@ const createShoppingList = async (data, userId) => {
   data.userId = userId;
   const shoppingList = new ShoppingList(data);
 
-  console.log('shoppingList -----------', shoppingList);
-
   return await shoppingList
     .save()
     .then(async () => {
@@ -105,8 +103,17 @@ const deleteShoppingList = async (shoppingListId, userId) => {
   if (!shoppingList) throw new NotFoundError("Shopping List doesn't exists");
 
   const response = await ShoppingList.deleteOne({ _id: shoppingListId, userId });
-  if (response) return true;
-  else return false;
+
+  if (response) {
+    await User.findOneAndUpdate(
+      { _id: userId },
+      {
+        $pull: { shoppingLists: shoppingListId },
+      },
+    );
+
+    return true;
+  } else return false;
 };
 
 module.exports = { createShoppingList, allShoppingLists, getShoppingList, updateShoppingList, deleteShoppingList };
