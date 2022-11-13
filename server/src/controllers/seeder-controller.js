@@ -6,6 +6,7 @@ const MongoClient = require('mongodb').MongoClient;
 const { DUMMY_ROLE } = require('../data/dummyRole');
 const { DUMMY_USER } = require('../data/dummyUser');
 const { DUMMY_SHOPPING_LIST } = require('../data/dummyShoppingList');
+const { DUMMY_SHOPPING_LIST_ITEM } = require('../data/dummyShoppingListItem');
 
 const logger = require('../utils/logger');
 
@@ -27,6 +28,7 @@ const createDummyData = async () => {
     const roleCollection = client.db('uu_homeworks').collection('role');
     const userCollection = client.db('uu_homeworks').collection('user');
     const shoppingListCollection = client.db('uu_homeworks').collection('shoppingList');
+    const shoppingListItemCollection = client.db('uu_homeworks').collection('shoppingListItem');
 
     const collections = await client.db('uu_homeworks').collections();
 
@@ -48,6 +50,7 @@ const createDummyData = async () => {
     roleCollection.insertMany(DUMMY_ROLE);
     userCollection.insertMany(DUMMY_USER);
     shoppingListCollection.insertMany(DUMMY_SHOPPING_LIST);
+    shoppingListItemCollection.insertMany(DUMMY_SHOPPING_LIST_ITEM);
 
     userCollection.findOneAndUpdate(
       { firstName: 'Admin' },
@@ -62,6 +65,31 @@ const createDummyData = async () => {
       {
         $set: {
           shoppingLists: [DUMMY_SHOPPING_LIST[2]],
+        },
+      },
+    );
+
+    shoppingListCollection.findOneAndUpdate(
+      { name: 'test01' },
+      {
+        $set: {
+          shoppingListItems: [DUMMY_SHOPPING_LIST_ITEM[0], DUMMY_SHOPPING_LIST_ITEM[1], DUMMY_SHOPPING_LIST_ITEM[2]],
+        },
+      },
+    );
+    shoppingListCollection.findOneAndUpdate(
+      { name: 'test02' },
+      {
+        $set: {
+          shoppingListItems: [DUMMY_SHOPPING_LIST_ITEM[3], DUMMY_SHOPPING_LIST_ITEM[4]],
+        },
+      },
+    );
+    shoppingListCollection.findOneAndUpdate(
+      { name: 'test03' },
+      {
+        $set: {
+          shoppingListItems: [DUMMY_SHOPPING_LIST_ITEM[5], DUMMY_SHOPPING_LIST_ITEM[6]],
         },
       },
     );

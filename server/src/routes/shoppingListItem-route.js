@@ -4,20 +4,33 @@ const express = require('express');
 const router = express.Router();
 const { body, param, matchedData, check } = require('express-validator');
 
+const { createShoppingListItems } = require('../controllers/shoppingListItem-controller');
+
 const { validateRequest } = require('../middleware/validate-request');
 const { checkJwt } = require('../middleware/authentication');
 
+const { isValidMongoId } = require('../utils/helpers');
+
 router.post(
   '/shopping-list/:shoppingListId/items',
-  checkJwt('isAllowed'),
-  param('shoppingListId').not().isEmpty().isString().trim().escape(),
+  checkJwt(),
+  param('shoppingListId')
+    .not()
+    .isEmpty()
+    .isString()
+    .trim()
+    .escape()
+    .custom((value) => isValidMongoId(value)),
   check('items.*.name').not().isEmpty().trim().escape().isLength({ min: 4, max: 255 }),
   check('items.*.status').not().isEmpty().isBoolean(),
   validateRequest,
   async (req, res, next) => {
     try {
-      const queryData = matchedData(req, { locations: ['body'] });
-      res.status(201).send(queryData);
+      const { shoppingListId } = req.params;
+      const response = await createShoppingListItems(matchedData(req, { locations: ['body'] }), shoppingListId);
+
+      if (response) res.status(201).send({ message: 'Shopping List Items successfully registered' });
+      else res.status(400).send({ message: 'Shopping List Items cannot be registered' });
     } catch (error) {
       next(error);
     }

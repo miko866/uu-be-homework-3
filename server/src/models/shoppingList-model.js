@@ -18,6 +18,12 @@ const shoppingListSchema = new mongoose.Schema(
       ref: 'userId',
       select: true,
     },
+    shoppingListItems: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'ShoppingListItem',
+      },
+    ],
   },
   { timestamps: true },
 );
