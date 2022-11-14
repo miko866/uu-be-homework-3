@@ -28,10 +28,17 @@ const connectDb = async () => {
         useNewUrlParser: true,
         useUnifiedTopology: true,
       })
-      .then((response) => {
+      .then(async (response) => {
         logger.info('Connected to database');
-        // Run seeds DB with Dummy data
-        createDummyData();
+
+        // create connection object
+        let db = mongoose.connection.db;
+        let collections = await db.listCollections().toArray();
+
+        // Run seeds DB with Dummy data only if DB is empty
+        // in other way use seeder endpoint
+        if (collections.length === 0) createDummyData();
+
         return response;
       })
       .catch((error) => {

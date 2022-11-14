@@ -7,7 +7,6 @@ const { DUMMY_ROLE } = require('../data/dummyRole');
 const { DUMMY_USER } = require('../data/dummyUser');
 const { DUMMY_SHOPPING_LIST } = require('../data/dummyShoppingList');
 const { DUMMY_SHOPPING_LIST_ITEM } = require('../data/dummyShoppingListItem');
-const { DUMMY_USER_SHOPPING_LIST } = require('../data/dummyUserShoppingList');
 
 const logger = require('../utils/logger');
 
@@ -30,7 +29,6 @@ const createDummyData = async () => {
     const userCollection = client.db('uu_homeworks').collection('user');
     const shoppingListCollection = client.db('uu_homeworks').collection('shoppingList');
     const shoppingListItemCollection = client.db('uu_homeworks').collection('shoppingListItem');
-    const userShoppingListCollection = client.db('uu_homeworks').collection('userShoppingList');
 
     const collections = await client.db('uu_homeworks').collections();
 
@@ -53,7 +51,6 @@ const createDummyData = async () => {
     userCollection.insertMany(DUMMY_USER);
     shoppingListCollection.insertMany(DUMMY_SHOPPING_LIST);
     shoppingListItemCollection.insertMany(DUMMY_SHOPPING_LIST_ITEM);
-    userShoppingListCollection.insertMany(DUMMY_USER_SHOPPING_LIST);
 
     userCollection.findOneAndUpdate(
       { firstName: 'Admin' },
@@ -81,6 +78,7 @@ const createDummyData = async () => {
             DUMMY_SHOPPING_LIST_ITEM[1]._id,
             DUMMY_SHOPPING_LIST_ITEM[2]._id,
           ],
+          allowedUsers: [DUMMY_USER[1], DUMMY_USER[2]],
         },
       },
     );
@@ -89,6 +87,7 @@ const createDummyData = async () => {
       {
         $set: {
           shoppingListItems: [DUMMY_SHOPPING_LIST_ITEM[3]._id, DUMMY_SHOPPING_LIST_ITEM[4]._id],
+          allowedUsers: [DUMMY_USER[1]],
         },
       },
     );
@@ -97,6 +96,7 @@ const createDummyData = async () => {
       {
         $set: {
           shoppingListItems: [DUMMY_SHOPPING_LIST_ITEM[5]._id, DUMMY_SHOPPING_LIST_ITEM[6]._id],
+          allowedUsers: [DUMMY_USER[2]],
         },
       },
     );

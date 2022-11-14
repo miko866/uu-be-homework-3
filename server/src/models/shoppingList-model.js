@@ -24,6 +24,12 @@ const shoppingListSchema = new mongoose.Schema(
         ref: 'ShoppingListItem',
       },
     ],
+    allowUsers: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User',
+      },
+    ],
   },
   { timestamps: true },
 );
@@ -33,12 +39,6 @@ shoppingListSchema.virtual('user', {
   localField: 'userId',
   foreignField: '_id',
   justOne: true,
-});
-
-shoppingListSchema.virtual('users', {
-  ref: 'UserShoppingList',
-  localField: '_id',
-  foreignField: 'userId',
 });
 
 shoppingListSchema.set('toObject', {

@@ -48,7 +48,7 @@ const checkJwt = (value) => {
         let shoppingListId = null;
 
         if (value === AUTH_MODE.isSamePersonOrAdmin) userId = req.params.userId;
-        if (value === AUTH_MODE.isAllowed) shoppingListId = req.params.shoppingListId;
+        if (value === AUTH_MODE.isAllowed) shoppingListId = req.params.shoppingListId; // TODO: maybe the same as isSamePersonOrAdmin but only diff attr -> make one depends on attr
         // eslint-disable-next-line no-use-before-define
         response = await trySwitch(value, decoded, userId, shoppingListId);
 
