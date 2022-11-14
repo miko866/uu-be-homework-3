@@ -78,7 +78,7 @@ const createDummyData = async () => {
             DUMMY_SHOPPING_LIST_ITEM[1]._id,
             DUMMY_SHOPPING_LIST_ITEM[2]._id,
           ],
-          allowedUsers: [DUMMY_USER[1], DUMMY_USER[2]],
+          allowedUsers: [DUMMY_USER[1]._id, DUMMY_USER[2]._id],
         },
       },
     );
@@ -87,7 +87,7 @@ const createDummyData = async () => {
       {
         $set: {
           shoppingListItems: [DUMMY_SHOPPING_LIST_ITEM[3]._id, DUMMY_SHOPPING_LIST_ITEM[4]._id],
-          allowedUsers: [DUMMY_USER[1]],
+          allowedUsers: [DUMMY_USER[1]._id],
         },
       },
     );
@@ -96,7 +96,7 @@ const createDummyData = async () => {
       {
         $set: {
           shoppingListItems: [DUMMY_SHOPPING_LIST_ITEM[5]._id, DUMMY_SHOPPING_LIST_ITEM[6]._id],
-          allowedUsers: [DUMMY_USER[2]],
+          allowedUsers: [DUMMY_USER[2]._id],
         },
       },
     );

@@ -19,7 +19,11 @@ const createShoppingList = async (data, userId) => {
   const checkUser = await User.findOne({ _id: userId }).lean();
   if (!checkUser) throw new NotFoundError("User doesn't exists");
 
+  const allowedUsers = await User.find({ _id: { $in: data.allowedUsers } }).lean();
+  if (allowedUsers.length === 0) throw new NotFoundError("Contributors doesn't exists");
+
   data.userId = userId;
+
   const shoppingList = new ShoppingList(data);
 
   return await shoppingList
@@ -39,6 +43,24 @@ const createShoppingList = async (data, userId) => {
     });
 };
 
+const addUserToShoppingList = async (data, shoppingListId) => {
+  const shoppingListExists = await ShoppingList.exists({ _id: shoppingListId });
+  if (!shoppingListExists) throw new ConflictError('Shopping no exists');
+
+  const checkUser = await User.findOne({ _id: data.userId }).lean();
+  if (!checkUser) throw new NotFoundError("User doesn't exists");
+
+  const response = await ShoppingList.findOneAndUpdate(
+    { _id: shoppingListId },
+    {
+      $push: { allowedUsers: data.userId },
+    },
+  );
+
+  if (response) return true;
+  else return false;
+};
+
 /**
  * Get list of all shopping lists for all users
  * @param {String} userId
@@ -50,8 +72,15 @@ const allShoppingLists = async (userId) => {
     const checkUser = await User.findOne({ _id: userId }).lean();
     if (!checkUser) throw new NotFoundError("User doesn't exists");
 
-    shoppingLists = await ShoppingList.find({ userId }).populate({ path: 'shoppingListItems' }).lean();
-  } else shoppingLists = await ShoppingList.find().populate({ path: 'shoppingListItems' }).lean();
+    shoppingLists = await ShoppingList.find({ userId })
+      .populate({ path: 'shoppingListItems' })
+      .populate({ path: 'allowedUsers' })
+      .lean();
+  } else
+    shoppingLists = await ShoppingList.find()
+      .populate({ path: 'shoppingListItems' })
+      .populate({ path: 'allowedUsers' })
+      .lean();
 
   if (shoppingLists.length === 0) throw new NoContentError('No shopping lists');
   return shoppingLists;
@@ -63,9 +92,10 @@ const allShoppingLists = async (userId) => {
  * @param {String} userId
  * @returns Object
  */
-const getShoppingList = async (shoppingListId, userId) => {
-  const shoppingList = await ShoppingList.findOne({ _id: shoppingListId, userId })
+const getShoppingList = async (shoppingListId) => {
+  const shoppingList = await ShoppingList.findOne({ _id: shoppingListId })
     .populate({ path: 'shoppingListItems' })
+    .populate({ path: 'allowedUsers' })
     .lean();
 
   if (!shoppingList) throw new NotFoundError("Shopping List doesn't exists");
@@ -84,6 +114,9 @@ const updateShoppingList = async (shoppingListId, userId, data) => {
   const checkShoppingList = await ShoppingList.findOne({ _id: shoppingListId }).lean();
   if (!checkShoppingList) throw new NotFoundError("Shopping list doesn't exists");
 
+  const allowedUsers = await User.find({ _id: { $in: data.allowedUsers } }).lean();
+  if (allowedUsers.length === 0) throw new NotFoundError("Contributors doesn't exists");
+
   const filter = { _id: shoppingListId, userId };
   const update = data;
   const opts = { new: true };
@@ -91,6 +124,21 @@ const updateShoppingList = async (shoppingListId, userId, data) => {
   const shoppingList = await ShoppingList.findOneAndUpdate(filter, update, opts);
 
   if (shoppingList) return true;
+  else return false;
+};
+
+const deleteAllowedUsers = async (shoppingListId, data) => {
+  const checkShoppingList = await ShoppingList.findOne({ _id: shoppingListId }).lean();
+  if (!checkShoppingList) throw new NotFoundError("Shopping list doesn't exists");
+
+  const response = await ShoppingList.findOneAndUpdate(
+    { _id: shoppingListId },
+    {
+      $pull: { allowedUsers: data.allowedUserId },
+    },
+  );
+
+  if (response) return true;
   else return false;
 };
 
@@ -118,4 +166,12 @@ const deleteShoppingList = async (shoppingListId, userId) => {
   } else return false;
 };
 
-module.exports = { createShoppingList, allShoppingLists, getShoppingList, updateShoppingList, deleteShoppingList };
+module.exports = {
+  createShoppingList,
+  addUserToShoppingList,
+  allShoppingLists,
+  getShoppingList,
+  updateShoppingList,
+  deleteAllowedUsers,
+  deleteShoppingList,
+};

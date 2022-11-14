@@ -6,9 +6,11 @@ const { body, param, matchedData } = require('express-validator');
 
 const {
   createShoppingList,
+  addUserToShoppingList,
   allShoppingLists,
   getShoppingList,
   updateShoppingList,
+  deleteAllowedUsers,
   deleteShoppingList,
 } = require('../controllers/shoppingList-controller');
 
@@ -21,13 +23,49 @@ router.post(
   '/shopping-list',
   checkJwt('getCurrentUser'),
   body('name').not().isEmpty().trim().escape().isLength({ min: 4, max: 255 }),
+  body('allowedUsers.*')
+    .optional({ nullable: true })
+    .trim()
+    .escape()
+    .custom((value) => isValidMongoId(value)),
   validateRequest,
   async (req, res, next) => {
     try {
       const response = await createShoppingList(matchedData(req, { locations: ['body'] }), req.userId);
 
-      if (response) res.status(201).send({ message: 'Shopping List successfully registered' });
-      else res.status(400).send({ message: 'Shopping List cannot be registered' });
+      if (response) res.status(201).send({ message: 'Shopping List successfully created' });
+      else res.status(400).send({ message: 'Shopping List cannot be created' });
+    } catch (error) {
+      next(error);
+    }
+  },
+);
+
+router.post(
+  '/shopping-list/:shoppingListId/add-user',
+  checkJwt('isSamePersonOrAdmin'),
+  param('shoppingListId')
+    .not()
+    .isEmpty()
+    .isString()
+    .trim()
+    .escape()
+    .custom((value) => isValidMongoId(value)),
+  body('userId')
+    .not()
+    .isEmpty()
+    .isString()
+    .trim()
+    .escape()
+    .custom((value) => isValidMongoId(value)),
+  validateRequest,
+  async (req, res, next) => {
+    try {
+      const { shoppingListId } = req.params;
+      const response = await addUserToShoppingList(matchedData(req, { locations: ['body'] }), shoppingListId);
+
+      if (response) res.status(201).send({ message: 'User  successfully added' });
+      else res.status(400).send({ message: 'User cannot be added' });
     } catch (error) {
       next(error);
     }
@@ -68,16 +106,9 @@ router.get(
 );
 
 router.get(
-  '/shopping-list/:shoppingListId/user/:userId',
+  '/shopping-list/:shoppingListId',
   checkJwt('isSamePersonOrAdmin'),
   param('shoppingListId')
-    .not()
-    .isEmpty()
-    .isString()
-    .trim()
-    .escape()
-    .custom((value) => isValidMongoId(value)),
-  param('userId')
     .not()
     .isEmpty()
     .isString()
@@ -87,9 +118,9 @@ router.get(
   validateRequest,
   async (req, res, next) => {
     try {
-      const { shoppingListId, userId } = req.params;
+      const { shoppingListId } = req.params;
 
-      const response = await getShoppingList(shoppingListId, userId);
+      const response = await getShoppingList(shoppingListId);
 
       res.status(200).send(response);
     } catch (error) {
@@ -99,7 +130,7 @@ router.get(
 );
 
 router.patch(
-  '/shopping-list/:shoppingListId/user/:userId',
+  '/shopping-list/:shoppingListId/user/:userId', // TODO: remove userId and update isSamePersonOrAdmin with JWT
   checkJwt('isSamePersonOrAdmin'),
   param('shoppingListId')
     .not()
@@ -116,17 +147,53 @@ router.patch(
     .escape()
     .custom((value) => isValidMongoId(value)),
   body('name').isString().trim().escape().isLength({ min: 4, max: 255 }),
+  body('allowedUsers.*')
+    .optional({ nullable: true })
+    .trim()
+    .escape()
+    .custom((value) => isValidMongoId(value)),
   validateRequest,
   async (req, res, next) => {
     try {
       const { shoppingListId, userId } = req.params;
       const bodyData = matchedData(req, { locations: ['body'] });
-      const isAdmin = req.isAdmin;
 
-      const response = await updateShoppingList(shoppingListId, userId, bodyData, isAdmin);
+      const response = await updateShoppingList(shoppingListId, userId, bodyData);
 
       if (response) res.status(201).send({ message: 'Shopping list successfully updated' });
       else res.status(400).send({ message: 'Shopping list cannot be updated' });
+    } catch (error) {
+      next(error);
+    }
+  },
+);
+
+router.delete(
+  '/shopping-list/:shoppingListId/remove-user',
+  checkJwt('isSamePersonOrAdmin'),
+  param('shoppingListId')
+    .not()
+    .isEmpty()
+    .isString()
+    .trim()
+    .escape()
+    .custom((value) => isValidMongoId(value)),
+  body('allowedUserId')
+    .not()
+    .isEmpty()
+    .trim()
+    .escape()
+    .custom((value) => isValidMongoId(value)),
+  validateRequest,
+  async (req, res, next) => {
+    try {
+      const { shoppingListId } = req.params;
+      const bodyData = matchedData(req, { locations: ['body'] });
+
+      const response = await deleteAllowedUsers(shoppingListId, bodyData);
+
+      if (response) res.status(204).send();
+      else res.status(400).send({ message: `Allowed user/s cannot be deleted` });
     } catch (error) {
       next(error);
     }

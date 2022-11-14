@@ -142,7 +142,13 @@ router.delete(
     .trim()
     .escape()
     .custom((value) => isValidMongoId(value)),
-  body('ids.*').not().isEmpty().isString().trim().escape(),
+  body('ids.*')
+    .not()
+    .isEmpty()
+    .isString()
+    .trim()
+    .escape()
+    .custom((value) => isValidMongoId(value)),
   validateRequest,
   async (req, res, next) => {
     try {

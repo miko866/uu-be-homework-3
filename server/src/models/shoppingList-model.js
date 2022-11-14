@@ -24,7 +24,7 @@ const shoppingListSchema = new mongoose.Schema(
         ref: 'ShoppingListItem',
       },
     ],
-    allowUsers: [
+    allowedUsers: [
       {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User',
