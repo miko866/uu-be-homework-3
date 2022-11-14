@@ -5,6 +5,12 @@ const ShoppingListItem = require('../models/shoppingListItem-model');
 
 const { ConflictError, NotFoundError, NoContentError } = require('../utils/errors');
 
+/**
+ * Create multiple shopping list items
+ * @param {Array[Object]} data
+ * @param {String} shoppingListId
+ * @returns Boolean
+ */
 const createShoppingListItems = async (data, shoppingListId) => {
   const shoppingListExists = await ShoppingList.exists({ _id: shoppingListId });
   if (!shoppingListExists) throw new ConflictError('Shopping List does not exists');
@@ -25,74 +31,87 @@ const createShoppingListItems = async (data, shoppingListId) => {
   );
 
   return true;
-};;
+};
 
 /**
- * Get list of all shopping lists for all users
- * @param {String} userId
+ * Get list of all items by shopping list id
+ * @param {String} shoppingListId
  * @returns Array[Object]
  */
-const allShoppingLists = async (userId) => {
-  let shoppingLists = null;
-  if (userId) {
-    const checkUser = await User.findOne({ _id: userId }).lean();
-    if (!checkUser) throw new NotFoundError("User doesn't exists");
-
-    shoppingLists = await ShoppingList.find({ userId }).lean();
-  } else shoppingLists = await ShoppingList.find().lean();
-
-  if (shoppingLists.length === 0) throw new NoContentError('No shopping lists');
-  return shoppingLists;
-};
-
-/**
- * Get one shopping list
- * @param {String} shoppingListId
- * @param {String} userId
- * @returns Object
- */
-const getShoppingList = async (shoppingListId, userId) => {
-  const shoppingList = await ShoppingList.findOne({ _id: shoppingListId, userId }).lean();
-
-  if (!shoppingList) throw new NotFoundError("Shopping List doesn't exists");
-
-  return shoppingList;
-};
-
-/**
- * Update one shopping list
- * @param {String} shoppingListId
- * @param {String} userId
- * @param {Object} data
- * @returns Boolean
- */
-const updateShoppingList = async (shoppingListId, userId, data) => {
+const allShoppingListItems = async (shoppingListId) => {
   const checkShoppingList = await ShoppingList.findOne({ _id: shoppingListId }).lean();
   if (!checkShoppingList) throw new NotFoundError("Shopping list doesn't exists");
 
-  const filter = { _id: shoppingListId, userId };
+  const shoppingListItems = await ShoppingListItem.find({ shoppingListId }).lean();
+
+  if (shoppingListItems.length === 0) throw new NoContentError('No shopping lists');
+  return shoppingListItems;
+};
+
+/**
+ * Get ona item by shopping list id
+ * @param {String} shoppingListId
+ * @param {String} itemId
+ * @returns Object
+ */
+const getShoppingListItem = async (shoppingListId, itemId) => {
+  const checkShoppingListItem = await ShoppingListItem.findOne({ _id: itemId, shoppingListId }).lean();
+  if (!checkShoppingListItem) throw new NotFoundError("Shopping list item doesn't exists");
+
+  return checkShoppingListItem;
+};
+
+/**
+ * Update shopping list item
+ * @param {String} shoppingListId
+ * @param {String} itemId
+ * @param {Object} data
+ * @returns Boolean
+ */
+const updateShoppingListItem = async (shoppingListId, itemId, data) => {
+  const checkShoppingListItem = await ShoppingListItem.findOne({ _id: itemId, shoppingListId }).lean();
+  if (!checkShoppingListItem) throw new NotFoundError("Shopping list item doesn't exists");
+
+  const filter = { _id: itemId, shoppingListId };
   const update = data;
   const opts = { new: true };
 
-  const shoppingList = await ShoppingList.findOneAndUpdate(filter, update, opts);
+  const shoppingListItem = await ShoppingListItem.findOneAndUpdate(filter, update, opts);
 
-  if (shoppingList) return true;
+  if (shoppingListItem) return true;
   else return false;
 };
 
 /**
- * Delete one shopping list
+ * Delete multiple items from shopping list by id
  * @param {String} shoppingListId
- * @param {String} userId
+ * @param {Array[String]} data
  * @returns Boolean
  */
-const deleteShoppingList = async (shoppingListId, userId) => {
-  const shoppingList = await ShoppingList.findOne({ _id: shoppingListId }).lean();
-  if (!shoppingList) throw new NotFoundError("Shopping List doesn't exists");
+const deleteShoppingListItems = async (shoppingListId, data) => {
+  const shoppingLists = await ShoppingListItem.find({ _id: { $in: data.ids } }).lean();
+  if (shoppingLists.length === 0) throw new NotFoundError("Shopping List doesn't exists");
 
-  const response = await ShoppingList.deleteOne({ _id: shoppingListId, userId });
-  if (response) return true;
-  else return false;
+  const response = await ShoppingListItem.deleteMany({ _id: { $in: data.ids } });
+
+  if (response) {
+    shoppingLists.map(async (list) => {
+      await ShoppingList.findOneAndUpdate(
+        { _id: shoppingListId },
+        {
+          $pull: { shoppingListItems: list._id },
+        },
+      );
+    });
+
+    return true;
+  } else return false;
 };
 
-module.exports = { createShoppingListItems };
+module.exports = {
+  createShoppingListItems,
+  allShoppingListItems,
+  getShoppingListItem,
+  updateShoppingListItem,
+  deleteShoppingListItems,
+};

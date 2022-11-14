@@ -4,7 +4,13 @@ const express = require('express');
 const router = express.Router();
 const { body, param, matchedData, check } = require('express-validator');
 
-const { createShoppingListItems } = require('../controllers/shoppingListItem-controller');
+const {
+  createShoppingListItems,
+  allShoppingListItems,
+  getShoppingListItem,
+  updateShoppingListItem,
+  deleteShoppingListItems,
+} = require('../controllers/shoppingListItem-controller');
 
 const { validateRequest } = require('../middleware/validate-request');
 const { checkJwt } = require('../middleware/authentication');
@@ -40,11 +46,20 @@ router.post(
 router.get(
   '/shopping-list/:shoppingListId/items',
   checkJwt('isAllowed'),
-  param('shoppingListId').not().isEmpty().isString().trim().escape(),
+  param('shoppingListId')
+    .not()
+    .isEmpty()
+    .isString()
+    .trim()
+    .escape()
+    .custom((value) => isValidMongoId(value)),
   validateRequest,
   async (req, res, next) => {
     try {
-      res.status(200).send();
+      const { shoppingListId } = req.params;
+      const response = await allShoppingListItems(shoppingListId);
+
+      res.status(200).send(response);
     } catch (error) {
       next(error);
     }
@@ -54,31 +69,63 @@ router.get(
 router.get(
   '/shopping-list/:shoppingListId/item/:itemId',
   checkJwt('isAllowed'),
-  param('shoppingListId').not().isEmpty().isString().trim().escape(),
-  param('itemId').not().isEmpty().isString().trim().escape(),
+  param('shoppingListId')
+    .not()
+    .isEmpty()
+    .isString()
+    .trim()
+    .escape()
+    .custom((value) => isValidMongoId(value)),
+  param('itemId')
+    .not()
+    .isEmpty()
+    .isString()
+    .trim()
+    .escape()
+    .custom((value) => isValidMongoId(value)),
   validateRequest,
   async (req, res, next) => {
     try {
-      res.status(200).send();
+      const { shoppingListId, itemId } = req.params;
+
+      const response = await getShoppingListItem(shoppingListId, itemId);
+
+      res.status(200).send(response);
     } catch (error) {
       next(error);
     }
   },
 );
 
-
 router.patch(
-  'shopping-list/:shoppingListId/item/:itemId',
+  '/shopping-list/:shoppingListId/item/:itemId',
   checkJwt('isAllowed'),
-  param('shoppingListId').not().isEmpty().isString().trim().escape(),
-  param('itemId').not().isEmpty().isString().trim().escape(),
+  param('shoppingListId')
+    .not()
+    .isEmpty()
+    .isString()
+    .trim()
+    .escape()
+    .custom((value) => isValidMongoId(value)),
+  param('itemId')
+    .not()
+    .isEmpty()
+    .isString()
+    .trim()
+    .escape()
+    .custom((value) => isValidMongoId(value)),
   body('name').isString().trim().escape().isLength({ min: 4, max: 255 }).optional({ nullable: true }),
   body('status').isBoolean().optional({ nullable: true }),
   validateRequest,
   async (req, res, next) => {
     try {
-      const queryData = matchedData(req, { locations: ['body', 'param'] });
-      res.status(201).send(queryData);
+      const { shoppingListId, itemId } = req.params;
+      const bodyData = matchedData(req, { locations: ['body'] });
+
+      const response = await updateShoppingListItem(shoppingListId, itemId, bodyData);
+
+      if (response) res.status(201).send({ message: 'Shopping list item successfully updated' });
+      else res.status(400).send({ message: 'Shopping list item cannot be updated' });
     } catch (error) {
       next(error);
     }
@@ -88,12 +135,23 @@ router.patch(
 router.delete(
   '/shopping-list/:shoppingListId/items',
   checkJwt('isAllowed'),
-  param('shoppingListId').not().isEmpty().isString().trim().escape(),
+  param('shoppingListId')
+    .not()
+    .isEmpty()
+    .isString()
+    .trim()
+    .escape()
+    .custom((value) => isValidMongoId(value)),
   body('ids.*').not().isEmpty().isString().trim().escape(),
   validateRequest,
   async (req, res, next) => {
     try {
-      res.status(204).send();
+      const { shoppingListId } = req.params;
+
+      const response = await deleteShoppingListItems(shoppingListId, matchedData(req, { locations: ['body'] }));
+
+      if (response) res.status(204).send();
+      else res.status(400).send({ message: `Shopping List cannot be deleted` });
     } catch (error) {
       next(error);
     }
