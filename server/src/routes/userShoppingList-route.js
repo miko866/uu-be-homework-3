@@ -4,26 +4,42 @@ const express = require('express');
 const router = express.Router();
 const { body, param, matchedData } = require('express-validator');
 
+const { createAllowUsers } = require('../controllers/userShoppingList-controller');
+
 const { validateRequest } = require('../middleware/validate-request');
 const { checkJwt } = require('../middleware/authentication');
 
+const { isValidMongoId } = require('../utils/helpers');
 
-router.post(
-  '/user-shopping-list',
-  checkJwt('isOwner'),
-  body('userId').not().isEmpty().isString().trim().escape(),
-  body('shoppingListId').not().isEmpty().isString().trim().escape(),
-  body('access').not().isEmpty().isBoolean(),
-  validateRequest,
-  async (req, res, next) => {
-    try {
-      const queryData = matchedData(req, { locations: ['body'] });
-      res.status(200).send(queryData);
-    } catch (error) {
-      next(error);
-    }
-  },
-);
+// router.post(
+//   '/users-shopping-list/user/:userId',
+//   checkJwt('isSamePersonOrAdmin'),
+//   body('userIds')
+//     .not()
+//     .isEmpty()
+//     .isString()
+//     .trim()
+//     .escape()
+//     .custom((value) => isValidMongoId(value)),
+//   body('shoppingListId')
+//     .not()
+//     .isEmpty()
+//     .isString()
+//     .trim()
+//     .escape()
+//     .custom((value) => isValidMongoId(value)),
+//   validateRequest,
+//   async (req, res, next) => {
+//     try {
+//       const response = await createAllowUsers(matchedData(req, { locations: ['body'] }), shoppingListId);
+
+//       if (response) res.status(201).send({ message: 'Shopping List Items successfully registered' });
+//       else res.status(400).send({ message: 'Shopping List Items cannot be registered' });
+//     } catch (error) {
+//       next(error);
+//     }
+//   },
+// );
 
 router.get(
   '/user-shopping-list/:shoppingListId/current-user',

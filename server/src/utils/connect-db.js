@@ -3,6 +3,8 @@
 const mongoose = require('mongoose');
 const env = require('env-var');
 
+const createDummyData = require('../controllers/seeder-controller');
+
 const logger = require('./logger');
 const { InternalServerError } = require('./errors');
 
@@ -28,6 +30,8 @@ const connectDb = async () => {
       })
       .then((response) => {
         logger.info('Connected to database');
+        // Run seeds DB with Dummy data
+        createDummyData();
         return response;
       })
       .catch((error) => {

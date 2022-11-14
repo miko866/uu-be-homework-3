@@ -4,7 +4,6 @@ const AUTH_MODE = {
   isAdmin: 'isAdmin',
   isSamePersonOrAdmin: 'isSamePersonOrAdmin',
   getCurrentUser: 'getCurrentUser',
-  isOwner: 'isOwner',
   isAllowed: 'isAllowed',
 };
 
