@@ -6,37 +6,33 @@ const User = require('../models/user-model');
 const { ConflictError, NotFoundError, NoContentError } = require('../utils/errors');
 const logger = require('../utils/logger');
 
-/**
- * Create new shopping list
- * @param {Object} data
- * @param {String} userId
- * @returns Boolean
- */
-const createShoppingList = async (data, userId) => {
-  const shoppingListExists = await ShoppingList.exists({ name: data.name });
-  if (shoppingListExists) throw new ConflictError('Shopping List exists');
 
-  const checkUser = await User.findOne({ _id: userId }).lean();
-  if (!checkUser) throw new NotFoundError("User doesn't exists");
+const createAllowUsers = async (data) => {
+  console.log('DATA -----------', data);
+  // const shoppingListExists = await ShoppingList.exists({ name: data.name });
+  // if (shoppingListExists) throw new ConflictError('Shopping List exists');
 
-  data.userId = userId;
-  const shoppingList = new ShoppingList(data);
+  // const checkUser = await User.findOne({ _id: userId }).lean();
+  // if (!checkUser) throw new NotFoundError("User doesn't exists");
 
-  return await shoppingList
-    .save()
-    .then(async () => {
-      await User.findOneAndUpdate(
-        { _id: userId },
-        {
-          $push: { shoppingLists: shoppingList },
-        },
-      );
-      return true;
-    })
-    .catch((error) => {
-      logger.error(error);
-      return false;
-    });
+  // data.userId = userId;
+  // const shoppingList = new ShoppingList(data);
+
+  // return await shoppingList
+  //   .save()
+  //   .then(async () => {
+  //     await User.findOneAndUpdate(
+  //       { _id: userId },
+  //       {
+  //         $push: { shoppingLists: shoppingList },
+  //       },
+  //     );
+  //     return true;
+  //   })
+  //   .catch((error) => {
+  //     logger.error(error);
+  //     return false;
+  //   });
 };
 
 /**
@@ -118,4 +114,4 @@ const deleteShoppingList = async (shoppingListId, userId) => {
   } else return false;
 };
 
-module.exports = { createShoppingList, allShoppingLists, getShoppingList, updateShoppingList, deleteShoppingList };
+module.exports = { createAllowUsers };

@@ -7,6 +7,7 @@ const { DUMMY_ROLE } = require('../data/dummyRole');
 const { DUMMY_USER } = require('../data/dummyUser');
 const { DUMMY_SHOPPING_LIST } = require('../data/dummyShoppingList');
 const { DUMMY_SHOPPING_LIST_ITEM } = require('../data/dummyShoppingListItem');
+const { DUMMY_USER_SHOPPING_LIST } = require('../data/dummyUserShoppingList');
 
 const logger = require('../utils/logger');
 
@@ -29,6 +30,7 @@ const createDummyData = async () => {
     const userCollection = client.db('uu_homeworks').collection('user');
     const shoppingListCollection = client.db('uu_homeworks').collection('shoppingList');
     const shoppingListItemCollection = client.db('uu_homeworks').collection('shoppingListItem');
+    const userShoppingListCollection = client.db('uu_homeworks').collection('userShoppingList');
 
     const collections = await client.db('uu_homeworks').collections();
 
@@ -51,6 +53,7 @@ const createDummyData = async () => {
     userCollection.insertMany(DUMMY_USER);
     shoppingListCollection.insertMany(DUMMY_SHOPPING_LIST);
     shoppingListItemCollection.insertMany(DUMMY_SHOPPING_LIST_ITEM);
+    userShoppingListCollection.insertMany(DUMMY_USER_SHOPPING_LIST);
 
     userCollection.findOneAndUpdate(
       { firstName: 'Admin' },

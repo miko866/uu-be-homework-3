@@ -11,35 +11,35 @@ const { checkJwt } = require('../middleware/authentication');
 
 const { isValidMongoId } = require('../utils/helpers');
 
-// router.post(
-//   '/users-shopping-list/user/:userId',
-//   checkJwt('isSamePersonOrAdmin'),
-//   body('userIds')
-//     .not()
-//     .isEmpty()
-//     .isString()
-//     .trim()
-//     .escape()
-//     .custom((value) => isValidMongoId(value)),
-//   body('shoppingListId')
-//     .not()
-//     .isEmpty()
-//     .isString()
-//     .trim()
-//     .escape()
-//     .custom((value) => isValidMongoId(value)),
-//   validateRequest,
-//   async (req, res, next) => {
-//     try {
-//       const response = await createAllowUsers(matchedData(req, { locations: ['body'] }), shoppingListId);
+router.post(
+  '/users-shopping-list/user/:userId',
+  checkJwt('isSamePersonOrAdmin'),
+  body('ids.*')
+    .not()
+    .isEmpty()
+    .isString()
+    .trim()
+    .escape()
+    .custom((value) => isValidMongoId(value)),
+  body('shoppingListId')
+    .not()
+    .isEmpty()
+    .isString()
+    .trim()
+    .escape()
+    .custom((value) => isValidMongoId(value)),
+  validateRequest,
+  async (req, res, next) => {
+    try {
+      const response = await createAllowUsers(matchedData(req, { locations: ['body'] }));
 
-//       if (response) res.status(201).send({ message: 'Shopping List Items successfully registered' });
-//       else res.status(400).send({ message: 'Shopping List Items cannot be registered' });
-//     } catch (error) {
-//       next(error);
-//     }
-//   },
-// );
+      if (response) res.status(201).send({ message: 'Allowd user for shopping list successfully created' });
+      else res.status(400).send({ message: 'Shopping List Items cannot be registered' });
+    } catch (error) {
+      next(error);
+    }
+  },
+);
 
 router.get(
   '/user-shopping-list/:shoppingListId/current-user',
