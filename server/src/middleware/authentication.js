@@ -44,13 +44,18 @@ const checkJwt = (value) => {
       } else if (value) {
         // Check JWT custom value
         let response = null;
-        let userId = null;
+        let ownerUserId = null;
+        let ownerShoppingListId = null;
         let shoppingListId = null;
 
-        if (value === AUTH_MODE.isSamePersonOrAdmin) userId = req.params.userId;
-        if (value === AUTH_MODE.isAllowed) shoppingListId = req.params.shoppingListId; // TODO: maybe the same as isSamePersonOrAdmin but only diff attr -> make one depends on attr
+        if (value === AUTH_MODE.isOwnerOrAdmin) {
+          ownerUserId = req.params.userId;
+          ownerShoppingListId = req.params.shoppingListId;
+        }
+        if (value === AUTH_MODE.isAllowed) shoppingListId = req.params.shoppingListId;
+
         // eslint-disable-next-line no-use-before-define
-        response = await trySwitch(value, decoded, userId, shoppingListId);
+        response = await trySwitch(value, decoded, ownerUserId, ownerShoppingListId, shoppingListId);
 
         if (response === 'admin') {
           req.isAdmin = true;
@@ -73,14 +78,14 @@ const checkJwt = (value) => {
  * @param {String} token
  * @returns Boolean
  */
-const trySwitch = async (value, decoded, userId, shoppingListId) => {
+const trySwitch = async (value, decoded, ownerUserId, ownerShoppingListId, shoppingListId) => {
   switch (value) {
     case AUTH_MODE.isAdmin:
       // eslint-disable-next-line no-use-before-define
       return await checkIsAdmin(decoded);
-    case AUTH_MODE.isSamePersonOrAdmin:
+    case AUTH_MODE.isOwnerOrAdmin:
       // eslint-disable-next-line no-use-before-define
-      return await checkIsSamePersonOrAdmin(decoded, userId);
+      return await checkIsOwnerOrAdmin(decoded, ownerUserId, ownerShoppingListId);
     case AUTH_MODE.isAllowed:
       // eslint-disable-next-line no-use-before-define
       return await checkIsAllowed(decoded, shoppingListId);
@@ -113,13 +118,18 @@ const checkIsAdmin = async (decoded) => {
  * @param {String} userId
  * @returns Boolean || String
  */
-const checkIsSamePersonOrAdmin = async (decoded, userId) => {
+const checkIsOwnerOrAdmin = async (decoded, ownerUserId, ownerShoppingListId) => {
   try {
     const role = await getRole(decoded.role, undefined);
+    let shoppingList = null;
 
-    if (decoded.id === userId && role.name === ROLE.admin) return 'admin';
-    else if (role.name === ROLE.admin) return 'admin';
-    else if (decoded.id === userId) return true;
+    if (ownerShoppingListId) {
+      shoppingList = await getShoppingList(ownerShoppingListId);
+    }
+
+    if (role.name === ROLE.admin) return 'admin';
+    else if (ownerUserId && decoded.id === ownerUserId) return true;
+    else if (shoppingList.userId.toString() === decoded.id) return true;
     else return false;
   } catch (error) {
     logger.error(`Error checkIsSamePersonOrAdmin: ${error}.`);
@@ -135,14 +145,18 @@ const checkIsSamePersonOrAdmin = async (decoded, userId) => {
  */
 const checkIsAllowed = async (decoded, shoppingListId) => {
   try {
-    const userId = decoded.id;
+    const response = await checkIsOwnerOrAdmin(decoded, null, shoppingListId);
 
-    const role = await getRole(decoded.role, undefined);
-    const shoppingList = await getShoppingList(shoppingListId, userId);
+    if (response) {
+      return true;
+    } else {
+      const shoppingList = await getShoppingList(shoppingListId);
 
-    if (role.name === ROLE.admin) return 'admin';
-    else if (shoppingList._id.toString() === shoppingListId && shoppingList.userId === userId) return true;
-    else return false;
+      const response = !!shoppingList.allowedUsers.find((user) => user._id.toString() === decoded.id);
+
+      if (response) return true;
+      return false;
+    }
   } catch (error) {
     logger.error(`Error checkIsSamePersonOrAdmin: ${error}.`);
     throw new NotAuthorizedError();

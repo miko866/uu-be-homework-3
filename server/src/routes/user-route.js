@@ -94,7 +94,7 @@ router.get(
 
 router.patch(
   '/user/:userId',
-  checkJwt('isSamePersonOrAdmin'),
+  checkJwt('checkIsOwnerOrAdmin'),
   param('userId')
     .not()
     .isEmpty()
@@ -126,7 +126,7 @@ router.patch(
 
 router.delete(
   '/user/:userId',
-  checkJwt('isSamePersonOrAdmin'),
+  checkJwt('checkIsOwnerOrAdmin'),
   param('userId')
     .not()
     .isEmpty()

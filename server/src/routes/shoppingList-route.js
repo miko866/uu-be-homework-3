@@ -43,7 +43,7 @@ router.post(
 
 router.post(
   '/shopping-list/:shoppingListId/add-user',
-  checkJwt('isSamePersonOrAdmin'),
+  checkJwt('checkIsOwnerOrAdmin'),
   param('shoppingListId')
     .not()
     .isEmpty()
@@ -63,7 +63,6 @@ router.post(
     try {
       const { shoppingListId } = req.params;
       const response = await addUserToShoppingList(matchedData(req, { locations: ['body'] }), shoppingListId);
-
       if (response) res.status(201).send({ message: 'User  successfully added' });
       else res.status(400).send({ message: 'User cannot be added' });
     } catch (error) {
@@ -84,7 +83,7 @@ router.get('/shopping-lists', checkJwt('isAdmin'), async (req, res, next) => {
 
 router.get(
   '/shopping-lists/:userId',
-  checkJwt('isSamePersonOrAdmin'),
+  checkJwt('isOwnerOrAdmin'),
   param('userId')
     .not()
     .isEmpty()
@@ -107,7 +106,7 @@ router.get(
 
 router.get(
   '/shopping-list/:shoppingListId',
-  checkJwt('isSamePersonOrAdmin'),
+  checkJwt('isAllowed'),
   param('shoppingListId')
     .not()
     .isEmpty()
@@ -130,8 +129,8 @@ router.get(
 );
 
 router.patch(
-  '/shopping-list/:shoppingListId/user/:userId', // TODO: remove userId and update isSamePersonOrAdmin with JWT
-  checkJwt('isSamePersonOrAdmin'),
+  '/shopping-list/:shoppingListId',
+  checkJwt('isOwnerOrAdmin'),
   param('shoppingListId')
     .not()
     .isEmpty()
@@ -170,7 +169,7 @@ router.patch(
 
 router.delete(
   '/shopping-list/:shoppingListId/remove-user',
-  checkJwt('isSamePersonOrAdmin'),
+  checkJwt('isOwnerOrAdmin'),
   param('shoppingListId')
     .not()
     .isEmpty()
@@ -201,8 +200,8 @@ router.delete(
 );
 
 router.delete(
-  '/shopping-list/:shoppingListId/user/:userId',
-  checkJwt('isSamePersonOrAdmin'),
+  '/shopping-list/:shoppingListId',
+  checkJwt('isOwnerOrAdmin'),
   param('shoppingListId')
     .not()
     .isEmpty()

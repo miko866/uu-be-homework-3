@@ -19,7 +19,7 @@ const { isValidMongoId } = require('../utils/helpers');
 
 router.post(
   '/shopping-list/:shoppingListId/items',
-  checkJwt(),
+  checkJwt('isAllowed'),
   param('shoppingListId')
     .not()
     .isEmpty()

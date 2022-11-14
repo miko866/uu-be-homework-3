@@ -2,7 +2,7 @@
 
 const AUTH_MODE = {
   isAdmin: 'isAdmin',
-  isSamePersonOrAdmin: 'isSamePersonOrAdmin',
+  isOwnerOrAdmin: 'isOwnerOrAdmin',
   getCurrentUser: 'getCurrentUser',
   isAllowed: 'isAllowed',
 };
