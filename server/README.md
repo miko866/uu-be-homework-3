@@ -1,8 +1,8 @@
 # SERVER
 
-## uu-Homework 2
+## uu-Homework 3
 
-BE Homework Assignment 2
+BE Homework Assignment 3
 
 ---
 
@@ -22,6 +22,7 @@ Docker or Podman must be installed.
 2.  Rename `.env.example` to `.env`
 3.  Run `$ npm i`
 4.  `$ npm run serve`
+5.  At the first time app will be seeded with dummy data
 
 ## Access
 
@@ -30,8 +31,9 @@ Docker or Podman must be installed.
 - (localhost) -> Port 4000
 - Credentials:
   1.  AdminUser: **adminPassword**
-  2.  SupervisorUser: **adminPassword**
-  3.  SimpleUser: **userPassword**
+  2.  SimpleUser: **userPassword**
+- MongoDB Compass URI:
+  - `mongodb://username:root@localhost:27017/`
 
 ---
 
