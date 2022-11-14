@@ -138,13 +138,6 @@ router.patch(
     .trim()
     .escape()
     .custom((value) => isValidMongoId(value)),
-  param('userId')
-    .not()
-    .isEmpty()
-    .isString()
-    .trim()
-    .escape()
-    .custom((value) => isValidMongoId(value)),
   body('name').isString().trim().escape().isLength({ min: 4, max: 255 }),
   body('allowedUsers.*')
     .optional({ nullable: true })
@@ -154,10 +147,10 @@ router.patch(
   validateRequest,
   async (req, res, next) => {
     try {
-      const { shoppingListId, userId } = req.params;
+      const { shoppingListId } = req.params;
       const bodyData = matchedData(req, { locations: ['body'] });
 
-      const response = await updateShoppingList(shoppingListId, userId, bodyData);
+      const response = await updateShoppingList(shoppingListId, bodyData);
 
       if (response) res.status(201).send({ message: 'Shopping list successfully updated' });
       else res.status(400).send({ message: 'Shopping list cannot be updated' });
@@ -209,19 +202,12 @@ router.delete(
     .trim()
     .escape()
     .custom((value) => isValidMongoId(value)),
-  param('userId')
-    .not()
-    .isEmpty()
-    .isString()
-    .trim()
-    .escape()
-    .custom((value) => isValidMongoId(value)),
   validateRequest,
   async (req, res, next) => {
     try {
-      const { shoppingListId, userId } = req.params;
+      const { shoppingListId } = req.params;
 
-      const response = await deleteShoppingList(shoppingListId, userId);
+      const response = await deleteShoppingList(shoppingListId);
 
       if (response) res.status(204).send();
       else res.status(400).send({ message: `Shopping List cannot be deleted` });

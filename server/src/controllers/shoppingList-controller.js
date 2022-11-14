@@ -43,6 +43,12 @@ const createShoppingList = async (data, userId) => {
     });
 };
 
+/**
+ * Add allowed user to shopping list
+ * @param {Object} data
+ * @param {String} shoppingListId
+ * @returns Boolean
+ */
 const addUserToShoppingList = async (data, shoppingListId) => {
   const shoppingListExists = await ShoppingList.exists({ _id: shoppingListId });
   if (!shoppingListExists) throw new ConflictError('Shopping no exists');
@@ -89,7 +95,6 @@ const allShoppingLists = async (userId) => {
 /**
  * Get one shopping list
  * @param {String} shoppingListId
- * @param {String} userId
  * @returns Object
  */
 const getShoppingList = async (shoppingListId) => {
@@ -106,11 +111,10 @@ const getShoppingList = async (shoppingListId) => {
 /**
  * Update one shopping list
  * @param {String} shoppingListId
- * @param {String} userId
  * @param {Object} data
  * @returns Boolean
  */
-const updateShoppingList = async (shoppingListId, userId, data) => {
+const updateShoppingList = async (shoppingListId, data) => {
   const checkShoppingList = await ShoppingList.findOne({ _id: shoppingListId }).lean();
   if (!checkShoppingList) throw new NotFoundError("Shopping list doesn't exists");
 
@@ -127,6 +131,12 @@ const updateShoppingList = async (shoppingListId, userId, data) => {
   else return false;
 };
 
+/**
+ * Remove allowed user from shopping list
+ * @param {String} shoppingListId
+ * @param {Object} data
+ * @returns
+ */
 const deleteAllowedUsers = async (shoppingListId, data) => {
   const checkShoppingList = await ShoppingList.findOne({ _id: shoppingListId }).lean();
   if (!checkShoppingList) throw new NotFoundError("Shopping list doesn't exists");
@@ -145,18 +155,17 @@ const deleteAllowedUsers = async (shoppingListId, data) => {
 /**
  * Delete one shopping list
  * @param {String} shoppingListId
- * @param {String} userId
  * @returns Boolean
  */
-const deleteShoppingList = async (shoppingListId, userId) => {
+const deleteShoppingList = async (shoppingListId) => {
   const shoppingList = await ShoppingList.findOne({ _id: shoppingListId }).lean();
   if (!shoppingList) throw new NotFoundError("Shopping List doesn't exists");
 
-  const response = await ShoppingList.deleteOne({ _id: shoppingListId, userId });
+  const response = await ShoppingList.deleteOne({ _id: shoppingListId });
 
   if (response) {
     await User.findOneAndUpdate(
-      { _id: userId },
+      { _id: shoppingList.userId },
       {
         $pull: { shoppingLists: shoppingListId },
       },

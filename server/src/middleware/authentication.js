@@ -113,9 +113,10 @@ const checkIsAdmin = async (decoded) => {
 };
 
 /**
- * A user can only update himself. An Admin can update all.
+ * the user can only work with their own resources and admin can do everything
  * @param {Object} decode
- * @param {String} userId
+ * @param {String} ownerUserId
+ * @param {String} ownerShoppingListId
  * @returns Boolean || String
  */
 const checkIsOwnerOrAdmin = async (decoded, ownerUserId, ownerShoppingListId) => {
@@ -138,10 +139,10 @@ const checkIsOwnerOrAdmin = async (decoded, ownerUserId, ownerShoppingListId) =>
 };
 
 /**
- *
+ * Check allowed users for shopping list
  * @param {Object} decoded
  * @param {String} shoppingListId
- * @returns Boolean || String
+ * @returns Boolean
  */
 const checkIsAllowed = async (decoded, shoppingListId) => {
   try {

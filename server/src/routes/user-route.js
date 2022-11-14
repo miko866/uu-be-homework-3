@@ -44,7 +44,13 @@ router.post(
   body('lastName').isString().trim().escape().isLength({ min: 2, max: 255 }),
   body('email').not().isEmpty().trim().escape().isEmail(),
   body('password').not().isEmpty().isString().trim().escape().isLength({ min: 4 }),
-  body('roleId').not().isEmpty().isString().trim().escape(),
+  body('roleId')
+    .not()
+    .isEmpty()
+    .isString()
+    .trim()
+    .escape()
+    .custom((value) => isValidMongoId(value)),
   validateRequest,
   async (req, res, next) => {
     try {
@@ -106,7 +112,12 @@ router.patch(
   body('lastName').isString().trim().escape().isLength({ min: 2, max: 255 }).optional({ nullable: true }),
   body('email').trim().escape().isEmail().optional({ nullable: true }),
   body('password').isString().trim().escape().isLength({ min: 4 }).optional({ nullable: true }),
-  body('roleId').isString().trim().escape().optional({ nullable: true }),
+  body('roleId')
+    .isString()
+    .trim()
+    .escape()
+    .optional({ nullable: true })
+    .custom((value) => isValidMongoId(value)),
   validateRequest,
   async (req, res, next) => {
     try {
