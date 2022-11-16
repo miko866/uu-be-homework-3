@@ -34,6 +34,15 @@ Docker or Podman must be installed.
   2.  SimpleUser: **userPassword**
 - MongoDB Compass URI:
   - `mongodb://username:root@localhost:27017/`
+- Insomnia / Postman
+  - import data from `/server/Collections/`
+  - create your own environment with that values :
+  ```
+  {
+	"host": "localhost:4000",
+	"jwtToken": "<COPY&PAST token from /login here>"
+  }
+  ```
 
 ---
 
