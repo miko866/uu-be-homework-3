@@ -100,7 +100,7 @@ router.get(
 
 router.patch(
   '/user/:userId',
-  checkJwt('checkIsOwnerOrAdmin'),
+  checkJwt('isOwnerOrAdmin'),
   param('userId')
     .not()
     .isEmpty()
