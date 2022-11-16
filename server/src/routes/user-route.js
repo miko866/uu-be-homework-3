@@ -137,7 +137,7 @@ router.patch(
 
 router.delete(
   '/user/:userId',
-  checkJwt('checkIsOwnerOrAdmin'),
+  checkJwt('isOwnerOrAdmin'),
   param('userId')
     .not()
     .isEmpty()

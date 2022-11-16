@@ -43,7 +43,7 @@ router.post(
 
 router.post(
   '/shopping-list/:shoppingListId/add-user',
-  checkJwt('checkIsOwnerOrAdmin'),
+  checkJwt('isOwnerOrAdmin'),
   param('shoppingListId')
     .not()
     .isEmpty()
