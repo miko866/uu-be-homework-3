@@ -121,7 +121,7 @@ const updateShoppingList = async (shoppingListId, data) => {
   const allowedUsers = await User.find({ _id: { $in: data.allowedUsers } }).lean();
   if (allowedUsers.length === 0) throw new NotFoundError("Contributors doesn't exists");
 
-  const filter = { _id: shoppingListId, userId };
+  const filter = { _id: shoppingListId };
   const update = data;
   const opts = { new: true };
 

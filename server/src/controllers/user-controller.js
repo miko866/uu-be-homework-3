@@ -1,6 +1,9 @@
 'use strict';
 
 const User = require('../models/user-model');
+const ShoppingList = require('../models/shoppingList-model');
+const ShoppingListItem = require('../models/shoppingListItem-model');
+
 const { getRole } = require('./role-controller');
 
 const { ConflictError, NotFoundError, ForbiddenError, NoContentError, NotAuthorizedError } = require('../utils/errors');
@@ -138,8 +141,30 @@ const deleteUser = async (userId) => {
   if (!user) throw new NotFoundError("User doesn't exists");
 
   const response = await User.deleteOne({ email: user.email });
-  if (response) return true;
-  else return false;
-};
+
+  // DELETE_CASCADE
+  if (response) {
+    const shoppingLists =  await ShoppingList.find({ userId }).lean()
+
+    shoppingLists?.map(async list => {
+      await ShoppingList.deleteOne({ _id: list._id });
+
+      list.shoppingListItems?.map(async item => {
+        await ShoppingListItem.deleteMany({ _id: { $in: item } });
+      })
+    })
+
+    user?.shoppingLists.map(async (list) => {
+      await ShoppingList.findOneAndUpdate(
+        { _id: list.toString() },
+        {
+          $pull: { allowedUsers: userId },
+        },
+      );
+    });
+
+    return true;
+  } else return false;
+};;
 
 module.exports = { registerUser, createUser, allUsers, getUser, updateUser, deleteUser };
