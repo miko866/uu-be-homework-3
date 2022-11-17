@@ -47,10 +47,10 @@ const createDummyData = async () => {
     }
 
     // Seed DB
-    roleCollection.insertMany(DUMMY_ROLE);
-    userCollection.insertMany(DUMMY_USER);
-    shoppingListCollection.insertMany(DUMMY_SHOPPING_LIST);
-    shoppingListItemCollection.insertMany(DUMMY_SHOPPING_LIST_ITEM);
+    await roleCollection.insertMany(DUMMY_ROLE);
+    await userCollection.insertMany(DUMMY_USER);
+    await shoppingListCollection.insertMany(DUMMY_SHOPPING_LIST);
+    await shoppingListItemCollection.insertMany(DUMMY_SHOPPING_LIST_ITEM);
 
     userCollection.findOneAndUpdate(
       { firstName: 'Admin' },
