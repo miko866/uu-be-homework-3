@@ -22,7 +22,7 @@ const { isValidMongoId } = require('../utils/helpers');
 router.post(
   '/shopping-list',
   checkJwt('getCurrentUser'),
-  body('name').not().isEmpty().trim().escape().isLength({ min: 4, max: 255 }),
+  body('name').not().isEmpty().trim().escape().isLength({ min: 2, max: 255 }),
   body('allowedUsers.*')
     .optional({ nullable: true })
     .trim()

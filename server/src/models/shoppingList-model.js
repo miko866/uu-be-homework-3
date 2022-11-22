@@ -8,7 +8,7 @@ const shoppingListSchema = new mongoose.Schema(
       type: String,
       required: true,
       maxlength: 255,
-      minlength: 4,
+      minlength: 2,
       trim: true,
       unique: true,
     },
