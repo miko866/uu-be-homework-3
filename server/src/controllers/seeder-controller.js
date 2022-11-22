@@ -18,6 +18,8 @@ const { BadRequestError } = require('../utils/errors');
  */
 const createDummyData = async () => {
   const mongoUri = env.get('MONGO_URI_DOCKER_SEED').required().asUrlString();
+  const mongoDbName = env.get('DB_NAME').required().asString();
+
   const client = new MongoClient(mongoUri);
   try {
     await client.connect();
@@ -25,12 +27,12 @@ const createDummyData = async () => {
     logger.info('Connected correctly to the Database.');
 
     // Create Collections
-    const roleCollection = client.db('uu_homeworks').collection('role');
-    const userCollection = client.db('uu_homeworks').collection('user');
-    const shoppingListCollection = client.db('uu_homeworks').collection('shoppingList');
-    const shoppingListItemCollection = client.db('uu_homeworks').collection('shoppingListItem');
+    const roleCollection = client.db(mongoDbName).collection('role');
+    const userCollection = client.db(mongoDbName).collection('user');
+    const shoppingListCollection = client.db(mongoDbName).collection('shoppingList');
+    const shoppingListItemCollection = client.db(mongoDbName).collection('shoppingListItem');
 
-    const collections = await client.db('uu_homeworks').collections();
+    const collections = await client.db(mongoDbName).collections();
 
     // Drop Collections if exists
     if (collections.length !== 0) {
@@ -52,7 +54,7 @@ const createDummyData = async () => {
     await shoppingListCollection.insertMany(DUMMY_SHOPPING_LIST);
     await shoppingListItemCollection.insertMany(DUMMY_SHOPPING_LIST_ITEM);
 
-    userCollection.findOneAndUpdate(
+   await userCollection.findOneAndUpdate(
       { firstName: 'Admin' },
       {
         $set: {
@@ -60,7 +62,7 @@ const createDummyData = async () => {
         },
       },
     );
-    userCollection.findOneAndUpdate(
+    await userCollection.findOneAndUpdate(
       { firstName: 'Simple' },
       {
         $set: {
@@ -69,7 +71,7 @@ const createDummyData = async () => {
       },
     );
 
-    shoppingListCollection.findOneAndUpdate(
+    await shoppingListCollection.findOneAndUpdate(
       { name: 'test01' },
       {
         $set: {
@@ -82,7 +84,7 @@ const createDummyData = async () => {
         },
       },
     );
-    shoppingListCollection.findOneAndUpdate(
+    await shoppingListCollection.findOneAndUpdate(
       { name: 'test02' },
       {
         $set: {
@@ -91,7 +93,7 @@ const createDummyData = async () => {
         },
       },
     );
-    shoppingListCollection.findOneAndUpdate(
+    await shoppingListCollection.findOneAndUpdate(
       { name: 'test03' },
       {
         $set: {

@@ -64,9 +64,9 @@ router.post(
   },
 );
 
-router.get('/users', checkJwt(), async (req, res, next) => {
+router.get('/users', checkJwt('getCurrentUser'), async (req, res, next) => {
   try {
-    const response = await allUsers();
+    const response = await allUsers(req.currentUser.roleId);
 
     res.status(200).send(response);
   } catch (error) {
@@ -76,7 +76,7 @@ router.get('/users', checkJwt(), async (req, res, next) => {
 
 router.get(
   '/user/:userId',
-  checkJwt(),
+  checkJwt('getCurrentUser'),
   param('userId')
     .not()
     .isEmpty()
@@ -89,7 +89,7 @@ router.get(
     try {
       const { userId } = req.params;
 
-      const response = await getUser(userId);
+      const response = await getUser(userId, req.currentUser.roleId);
 
       res.status(200).send(response);
     } catch (error) {

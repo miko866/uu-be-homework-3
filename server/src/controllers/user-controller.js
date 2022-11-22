@@ -67,11 +67,17 @@ const createUser = async (data) => {
 };
 
 /**
- * Get all users can only admin
+ * Get list of all users
+ * Admins can get all data
+ * @param {String} roleId
  * @returns {Array[Object]} users
  */
-const allUsers = async () => {
-  const users = await User.find().populate({ path: 'role' }).populate({ path: 'shoppingLists' }).lean();
+const allUsers = async (roleId) => {
+  const role = await getRole(roleId, undefined);
+  let users = null;
+  if (role.name === ROLE.admin)
+    users = await User.find().populate({ path: 'role' }).populate({ path: 'shoppingLists' }).lean();
+  else users = await User.find().select({ shoppingLists: 0, roleId: 0 }).lean();
 
   if (users.length === 0) throw new NoContentError('No users');
   return users;
@@ -80,13 +86,18 @@ const allUsers = async () => {
 /**
  * Get one user depends on id
  * @param {String} userId
+ * @param {String} roleId
  * @returns {Object } user
  */
-const getUser = async (userId) => {
-  const user = await User.findOne({ _id: userId })
-    .lean()
-    .populate([{ path: 'role' }])
-    .populate({ path: 'shoppingLists' });
+const getUser = async (userId, roleId) => {
+  const role = await getRole(roleId, undefined);
+  let user = null;
+  if (role.name === ROLE.admin)
+    user = await User.findOne({ _id: userId })
+      .lean()
+      .populate([{ path: 'role' }])
+      .populate({ path: 'shoppingLists' });
+  else user = await User.findOne({ _id: userId }).select({ shoppingLists: 0, roleId: 0 }).lean();
 
   if (!user) throw new NotFoundError("User doesn't exists");
 
@@ -132,7 +143,8 @@ const updateUser = async (userId, data, isAdmin) => {
 };
 
 /**
- * Only admins can delete user
+ * Only admins can delete every user and owner can delete himself
+ * Booth are with CASCADE
  * @param {String} userId
  * @returns Boolean
  */

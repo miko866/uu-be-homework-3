@@ -31,7 +31,7 @@ router.post(
   validateRequest,
   async (req, res, next) => {
     try {
-      const response = await createShoppingList(matchedData(req, { locations: ['body'] }), req.userId);
+      const response = await createShoppingList(matchedData(req, { locations: ['body'] }), req.currentUser.userId);
 
       if (response) res.status(201).send({ message: 'Shopping List successfully created' });
       else res.status(400).send({ message: 'Shopping List cannot be created' });

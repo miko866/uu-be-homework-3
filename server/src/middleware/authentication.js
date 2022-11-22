@@ -39,7 +39,7 @@ const checkJwt = (value) => {
       }
 
       if (value === AUTH_MODE.getCurrentUser) {
-        req.userId = decoded.id;
+        req.currentUser = { userId: decoded.id, roleId: decoded.role };
         next();
       } else if (value) {
         // Check JWT custom value
