@@ -10,7 +10,7 @@ const shoppingListSchema = new mongoose.Schema(
       maxlength: 255,
       minlength: 2,
       trim: true,
-      unique: true,
+      unique: false,
     },
     userId: {
       type: mongoose.Schema.Types.ObjectId,
